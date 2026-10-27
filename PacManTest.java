@@ -35,8 +35,49 @@ public class PacManTest {
         System.out.println("testPowerPelletsLoaded passed");
     }
 
+    public static void testPowerPelletEatsGhost() {
+        PacMan game = new PacMan();
+        if (game.gameLoop != null) game.gameLoop.stop();
+
+        int initialScore = game.score;
+        int initialLives = game.lives;
+
+        // Simulate eating power food
+        PacMan.Block pf = game.getPowerFoods().iterator().next();
+        game.pacman.x = pf.x;
+        game.pacman.y = pf.y;
+        game.checkFoodCollisions();
+
+        if (game.getScaredTimer() <= 0) {
+            throw new AssertionError("Scared timer not activated upon eating power pellet");
+        }
+        if (game.score != initialScore + 50) {
+            throw new AssertionError("Score did not increase by 50. Current score=" + game.score);
+        }
+
+        // Now test eating a ghost while scared in an isolated position
+        PacMan.Block ghost = game.ghosts.iterator().next();
+        ghost.x = 200;
+        ghost.y = 200;
+        game.pacman.x = 200;
+        game.pacman.y = 200;
+        game.checkGhostCollisions();
+
+        if (game.lives != initialLives) {
+            throw new AssertionError("Lives decreased when eating scared ghost! lives=" + game.lives);
+        }
+        if (game.score != initialScore + 50 + 200) {
+            throw new AssertionError("Score did not award 200 for eating scared ghost. score=" + game.score);
+        }
+        if (ghost.x != ghost.startX || ghost.y != ghost.startY) {
+            throw new AssertionError("Eaten ghost did not reset to start position");
+        }
+        System.out.println("testPowerPelletEatsGhost passed");
+    }
+
     public static void main(String[] args) {
         testTunnelWrap();
         testPowerPelletsLoaded();
+        testPowerPelletEatsGhost();
     }
 }
