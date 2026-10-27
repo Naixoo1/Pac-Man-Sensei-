@@ -75,6 +75,22 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private int boardWidth = columnCount * tileSize;
     private int boardHeight = rowCount * tileSize;
 
+    public int getBoardWidth() {
+        return boardWidth;
+    }
+
+    public int getBoardHeight() {
+        return boardHeight;
+    }
+
+    public void handleTunnelWrap(Block entity) {
+        if (entity.x + entity.width <= 0) {
+            entity.x = boardWidth - entity.width;
+        } else if (entity.x >= boardWidth) {
+            entity.x = 0;
+        }
+    }
+
     private Image wallImage;
     private Image blueGhostImage;
     private Image orangeGhostImage;
@@ -230,6 +246,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void move() {
         pacman.x += pacman.velocityX;
         pacman.y += pacman.velocityY;
+        handleTunnelWrap(pacman);
 
         //check wall collisions
         for (Block wall : walls) {
@@ -256,8 +273,9 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             }
             ghost.x += ghost.velocityX;
             ghost.y += ghost.velocityY;
+            handleTunnelWrap(ghost);
             for (Block wall : walls) {
-                if (collision(ghost, wall) || ghost.x <= 0 || ghost.x + ghost.width >= boardWidth) {
+                if (collision(ghost, wall) || ((ghost.x < 0 || ghost.x + ghost.width > boardWidth) && ghost.y != tileSize*9)) {
                     ghost.x -= ghost.velocityX;
                     ghost.y -= ghost.velocityY;
                     char newDirection = directions[random.nextInt(4)];
