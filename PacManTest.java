@@ -95,10 +95,30 @@ public class PacManTest {
         System.out.println("testGhostIntersectionTurning passed");
     }
 
+    public static void testInputBuffering() {
+        PacMan game = new PacMan();
+        if (game.gameLoop != null) game.gameLoop.stop();
+
+        game.pacman.x = 9 * 32;
+        game.pacman.y = 15 * 32; // Start position
+        game.pacman.direction = 'L';
+        game.pacman.updateVelocity();
+        
+        // Set nextDirection to 'R' (opposite or pending turn)
+        game.setNextDirection('R');
+        game.applyBufferedDirection();
+        
+        if (game.pacman.direction != 'R') {
+            throw new AssertionError("Buffered direction 'R' was not applied when open. direction=" + game.pacman.direction);
+        }
+        System.out.println("testInputBuffering passed");
+    }
+
     public static void main(String[] args) {
         testTunnelWrap();
         testPowerPelletsLoaded();
         testPowerPelletEatsGhost();
         testGhostIntersectionTurning();
+        testInputBuffering();
     }
 }

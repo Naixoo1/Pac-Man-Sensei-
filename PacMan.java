@@ -141,6 +141,38 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         return valid;
     }
 
+    char nextDirection = 'R';
+
+    public void setNextDirection(char dir) {
+        this.nextDirection = dir;
+    }
+
+    public char getNextDirection() {
+        return this.nextDirection;
+    }
+
+    public void updatePacmanImage() {
+        if (pacman.direction == 'U') {
+            pacman.image = pacmanUpImage;
+        }
+        else if (pacman.direction == 'D') {
+            pacman.image = pacmanDownImage;
+        }
+        else if (pacman.direction == 'L') {
+            pacman.image = pacmanLeftImage;
+        }
+        else if (pacman.direction == 'R') {
+            pacman.image = pacmanRightImage;
+        }
+    }
+
+    public void applyBufferedDirection() {
+        if (canMove(pacman, nextDirection)) {
+            pacman.updateDirection(nextDirection);
+            updatePacmanImage();
+        }
+    }
+
     private Image wallImage;
     private Image powerFoodImage;
     private Image blueGhostImage;
@@ -326,6 +358,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                 }
             }
         }
+        applyBufferedDirection();
         pacman.x += pacman.velocityX;
         pacman.y += pacman.velocityY;
         handleTunnelWrap(pacman);
