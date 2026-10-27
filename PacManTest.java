@@ -24,7 +24,19 @@ public class PacManTest {
         System.out.println("testTunnelWrap passed");
     }
 
+    public static void testPowerPelletsLoaded() {
+        PacMan game = new PacMan();
+        if (game.gameLoop != null) game.gameLoop.stop();
+
+        java.util.HashSet<PacMan.Block> powerFoods = game.getPowerFoods();
+        if (powerFoods == null || powerFoods.size() != 4) {
+            throw new AssertionError("Expected 4 power pellets, found: " + (powerFoods == null ? 0 : powerFoods.size()));
+        }
+        System.out.println("testPowerPelletsLoaded passed");
+    }
+
     public static void main(String[] args) {
         testTunnelWrap();
+        testPowerPelletsLoaded();
     }
 }

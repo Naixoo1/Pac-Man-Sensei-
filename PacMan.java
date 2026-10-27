@@ -92,6 +92,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
     private Image wallImage;
+    private Image powerFoodImage;
     private Image blueGhostImage;
     private Image orangeGhostImage;
     private Image pinkGhostImage;
@@ -108,7 +109,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         "XXXXXXXXXXXXXXXXXXX",
         "X        X        X",
         "X XX XXX X XXX XX X",
-        "X                 X",
+        "X*               *X",
         "X XX X XXXXX X XX X",
         "X    X       X    X",
         "XXXX XXXX XXXX XXXX",
@@ -124,12 +125,17 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         "XX X X XXXXX X X XX",
         "X    X   X   X    X",
         "X XXXXXX X XXXXXX X",
-        "X                 X",
+        "X*               *X",
         "XXXXXXXXXXXXXXXXXXX" 
     };
 
     HashSet<Block> walls;
     HashSet<Block> foods;
+    HashSet<Block> powerFoods;
+
+    public HashSet<Block> getPowerFoods() {
+        return powerFoods;
+    }
     HashSet<Block> ghosts;
     Block pacman;
 
@@ -148,6 +154,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         //load images
         wallImage = new ImageIcon(getClass().getResource("./wall.png")).getImage();
+        powerFoodImage = new ImageIcon(getClass().getResource("./powerFood.png")).getImage();
         blueGhostImage = new ImageIcon(getClass().getResource("./blueGhost.png")).getImage();
         orangeGhostImage = new ImageIcon(getClass().getResource("./orangeGhost.png")).getImage();
         pinkGhostImage = new ImageIcon(getClass().getResource("./pinkGhost.png")).getImage();
@@ -172,6 +179,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void loadMap() {
         walls = new HashSet<Block>();
         foods = new HashSet<Block>();
+        powerFoods = new HashSet<Block>();
         ghosts = new HashSet<Block>();
 
         for (int r = 0; r < rowCount; r++) {
@@ -209,6 +217,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                     Block food = new Block(null, x + 14, y + 14, 4, 4);
                     foods.add(food);
                 }
+                else if (tileMapChar == '*') { //power food
+                    Block powerFood = new Block(powerFoodImage, x + 8, y + 8, 16, 16);
+                    powerFoods.add(powerFood);
+                }
             }
         }
     }
@@ -227,6 +239,10 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         for (Block wall : walls) {
             g.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height, null);
+        }
+
+        for (Block powerFood : powerFoods) {
+            g.drawImage(powerFood.image, powerFood.x, powerFood.y, powerFood.width, powerFood.height, null);
         }
 
         g.setColor(Color.WHITE);
@@ -294,7 +310,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
         foods.remove(foodEaten);
 
-        if (foods.isEmpty()) {
+        if (foods.isEmpty() && powerFoods.isEmpty()) {
             loadMap();
             resetPositions();
         }
