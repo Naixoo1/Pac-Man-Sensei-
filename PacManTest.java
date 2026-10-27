@@ -114,11 +114,129 @@ public class PacManTest {
         System.out.println("testInputBuffering passed");
     }
 
+    public static void testReviewFocusTunnelNoWallCollision() {
+        PacMan game = new PacMan();
+        if (game.gameLoop != null) game.gameLoop.stop();
+
+        // PacMan at Row 9
+        game.pacman.y = 9 * 32;
+        int[] testX = {-32, -16, -8, 0, game.getBoardWidth() - 32, game.getBoardWidth(), game.getBoardWidth() + 16};
+        for (int x : testX) {
+            game.pacman.x = x;
+            for (PacMan.Block wall : game.walls) {
+                if (game.collision(game.pacman, wall)) {
+                    throw new AssertionError("Pacman collided with wall during tunnel wrap at x=" + x);
+                }
+            }
+        }
+        System.out.println("testReviewFocusTunnelNoWallCollision passed");
+    }
+
+    public static void testReviewFocusDoubleEat() {
+        PacMan game = new PacMan();
+        if (game.gameLoop != null) game.gameLoop.stop();
+
+        // Place food and powerFood at same spot
+        PacMan.Block food = game.foods.iterator().next();
+        PacMan.Block powerFood = game.getPowerFoods().iterator().next();
+        game.pacman.x = food.x;
+        game.pacman.y = food.y;
+        powerFood.x = food.x;
+        powerFood.y = food.y;
+
+        int beforeFoods = game.foods.size();
+        int beforePower = game.getPowerFoods().size();
+
+        game.checkFoodCollisions();
+
+        if (game.foods.size() != beforeFoods - 1 || game.getPowerFoods().size() != beforePower - 1) {
+            throw new AssertionError("Both food and powerFood should be eaten cleanly without exception");
+        }
+        System.out.println("testReviewFocusDoubleEat passed");
+    }
+
+    public static void testReviewFocusEatenGhostImmunity() {
+        PacMan game = new PacMan();
+        if (game.gameLoop != null) game.gameLoop.stop();
+
+        PacMan.Block ghost = game.ghosts.iterator().next();
+        // Trigger scared mode
+        game.scaredTimer = 100;
+        ghost.isScared = true;
+        ghost.image = game.scaredGhostImage;
+
+        // Eat ghost once
+        ghost.x = 200;
+        ghost.y = 200;
+        game.pacman.x = 200;
+        game.pacman.y = 200;
+        game.checkGhostCollisions();
+
+        int scoreAfterFirstEat = game.score;
+
+        // Verify ghost is no longer scared
+        if (ghost.isScared) {
+            throw new AssertionError("Eaten ghost should have isScared=false");
+        }
+
+        // Place Pac-Man at ghost spawn position inside house
+        game.pacman.x = ghost.x;
+        game.pacman.y = ghost.y;
+        int livesBefore = game.lives;
+        game.checkGhostCollisions();
+
+        // Should NOT award another 200 points; should decrement life because ghost is normal
+        if (game.score != scoreAfterFirstEat) {
+            throw new AssertionError("Eaten ghost was re-eaten for points! score=" + game.score);
+        }
+        if (game.lives != livesBefore - 1) {
+            throw new AssertionError("Ghost in house did not damage Pac-Man when no longer scared");
+        }
+        System.out.println("testReviewFocusEatenGhostImmunity passed");
+    }
+
+    public static void testReviewFocusGhostDeadEnd() {
+        PacMan game = new PacMan();
+        if (game.gameLoop != null) game.gameLoop.stop();
+
+        PacMan.Block ghost = game.ghosts.iterator().next();
+        // Position ghost facing Left, only Right is open
+        ghost.x = 1 * 32;
+        ghost.y = 1 * 32;
+        ghost.direction = 'L'; // Moving Left into wall at x=0
+        
+        java.util.List<Character> dirs = game.getValidDirections(ghost, true);
+        if (dirs.isEmpty()) {
+            throw new AssertionError("Dead end must return at least the 180-degree turnaround direction");
+        }
+        System.out.println("testReviewFocusGhostDeadEnd passed");
+    }
+
+    public static void testReviewFocusGhostHouseExit() {
+        PacMan game = new PacMan();
+        if (game.gameLoop != null) game.gameLoop.stop();
+
+        PacMan.Block ghost = game.ghosts.iterator().next();
+        // At row 9, col 6: open upward passage to row 7
+        ghost.x = 6 * 32;
+        ghost.y = 9 * 32;
+        if (!game.canMove(ghost, 'U')) {
+            throw new AssertionError("Ghost at (col 6, row 9) cannot move Up out of ghost house");
+        }
+        System.out.println("testReviewFocusGhostHouseExit passed");
+    }
+
     public static void main(String[] args) {
         testTunnelWrap();
         testPowerPelletsLoaded();
         testPowerPelletEatsGhost();
         testGhostIntersectionTurning();
         testInputBuffering();
+        testReviewFocusTunnelNoWallCollision();
+        testReviewFocusDoubleEat();
+        testReviewFocusEatenGhostImmunity();
+        testReviewFocusGhostDeadEnd();
+        testReviewFocusGhostHouseExit();
+        System.out.println("All Review Focus edge cases passed!");
     }
 }

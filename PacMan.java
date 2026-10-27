@@ -179,7 +179,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private Image orangeGhostImage;
     private Image pinkGhostImage;
     private Image redGhostImage;
-    private Image scaredGhostImage;
+    Image scaredGhostImage;
     int scaredTimer = 0;
 
     public int getScaredTimer() {
