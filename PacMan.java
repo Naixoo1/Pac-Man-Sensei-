@@ -94,6 +94,53 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
     }
 
+    public char getOppositeDirection(char dir) {
+        if (dir == 'U') return 'D';
+        if (dir == 'D') return 'U';
+        if (dir == 'L') return 'R';
+        if (dir == 'R') return 'L';
+        return ' ';
+    }
+
+    public boolean canMove(Block block, char dir) {
+        int vx = 0;
+        int vy = 0;
+        if (dir == 'U') vy = -tileSize/4;
+        else if (dir == 'D') vy = tileSize/4;
+        else if (dir == 'L') vx = -tileSize/4;
+        else if (dir == 'R') vx = tileSize/4;
+
+        int nextX = block.x + vx;
+        int nextY = block.y + vy;
+        int w = block.width;
+        int h = block.height;
+
+        for (Block wall : walls) {
+            if (nextX < wall.x + wall.width &&
+                nextX + w > wall.x &&
+                nextY < wall.y + wall.height &&
+                nextY + h > wall.y) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public java.util.List<Character> getValidDirections(Block block, boolean excludeReverse) {
+        java.util.List<Character> valid = new java.util.ArrayList<Character>();
+        char opp = getOppositeDirection(block.direction);
+        for (char d : directions) {
+            if (excludeReverse && d == opp) continue;
+            if (canMove(block, d)) {
+                valid.add(d);
+            }
+        }
+        if (valid.isEmpty() && excludeReverse && canMove(block, opp)) {
+            valid.add(opp);
+        }
+        return valid;
+    }
+
     private Image wallImage;
     private Image powerFoodImage;
     private Image blueGhostImage;

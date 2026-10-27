@@ -75,9 +75,30 @@ public class PacManTest {
         System.out.println("testPowerPelletEatsGhost passed");
     }
 
+    public static void testGhostIntersectionTurning() {
+        PacMan game = new PacMan();
+        if (game.gameLoop != null) game.gameLoop.stop();
+
+        PacMan.Block ghost = game.ghosts.iterator().next();
+        
+        // Position ghost at intersection (Row 5, Col 1) where multiple directions are open
+        ghost.x = 1 * 32;
+        ghost.y = 5 * 32;
+        ghost.direction = 'U';
+        ghost.updateVelocity();
+
+        // Check available directions at this junction
+        java.util.List<Character> openDirs = game.getValidDirections(ghost, true);
+        if (!openDirs.contains('R')) {
+            throw new AssertionError("Ghost cannot detect open right turn at intersection (Row 5, Col 1)");
+        }
+        System.out.println("testGhostIntersectionTurning passed");
+    }
+
     public static void main(String[] args) {
         testTunnelWrap();
         testPowerPelletsLoaded();
         testPowerPelletEatsGhost();
+        testGhostIntersectionTurning();
     }
 }
